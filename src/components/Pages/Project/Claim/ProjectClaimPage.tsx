@@ -31,11 +31,9 @@ const ProjectClaimPage = () => {
   const [loading, setLoading] = useState(true)
   const [hasClaimed, setHasClaimed] = useState(false)
   const [autoBurn, setautoBurn] = useState(0)
-  const [burning, setBurning] = useState(false)
 
   const { getXZKPBalance } = useTokenContract()
   const { claimLotteryTickets, getTicketsBalance, setApprovalForAll, isApprovedForAll } = useLotteryTokenContract()
-  const { getUserInfo } = useIDOContract()
   const dispatch = useAppDispatch()
   const { addTransaction } = useTransactions()
 
@@ -69,7 +67,7 @@ const ProjectClaimPage = () => {
     }
   }
 
-  const moderator = '0x0163A6e08d795E9A0eaBc908d7536c70735aF95ED0474B33C64f01d8b5b6E0bc'
+  const moderator = "Write the moderator's address"
 
   const autoBurnTickets = async () => {
     if (!autoBurn) {
