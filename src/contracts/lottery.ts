@@ -14,7 +14,7 @@ export const useLotteryTokenContract = () => {
   const { getContract } = useContract()
 
   const getLotteryTokenContract = async () =>
-    getContract(Contracts[CHAIN].lottery_token, LOTTERY_TOKEN_ABI)
+    getContract('0x06ff0de06e1b21e7050ed36d6fdc0f1dcec46b7300afe540c8ae6741373cd4a0', LOTTERY_TOKEN_ABI)
 
   const claimLotteryTickets = async (id: number.BigNumberish) => {
     const contract = await getLotteryTokenContract()
@@ -64,11 +64,23 @@ export const useLotteryTokenContract = () => {
     return await contract.call('balanceOf', [address, parseInputAmountToUint256(id.toString(), 0)])
   }
 
+  const setApprovalForAll = async (operator: string | undefined, approved: number) => {
+    const contract = await getLotteryTokenContract()
+    return await contract.invoke('setApprovalForAll', [operator, approved])
+  }
+
+  const isApprovedForAll = async (account: string | undefined, operator: string | undefined) => {
+    const contract = await getLotteryTokenContract()
+    return await contract.call('isApprovedForAll', [account, operator])
+  }
+
   return {
     getLotteryTokenContract,
     claimLotteryTickets,
     burn,
     getTicketsBalance,
     burnWithQuest,
+    setApprovalForAll,
+    isApprovedForAll,
   }
 }
