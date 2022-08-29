@@ -14,7 +14,7 @@ export const useLotteryTokenContract = () => {
   const { getContract } = useContract()
 
   const getLotteryTokenContract = async () =>
-    getContract(Contracts[CHAIN].lottery_token,, LOTTERY_TOKEN_ABI)
+    getContract(Contracts[CHAIN].lottery_token, LOTTERY_TOKEN_ABI)
 
   const claimLotteryTickets = async (id: number.BigNumberish) => {
     const contract = await getLotteryTokenContract()
