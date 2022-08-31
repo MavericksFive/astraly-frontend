@@ -6,22 +6,82 @@ import VerifyAccount from './VerifyAccount'
 import AccountLinks from './AccountLinks'
 import Planets from 'assets/animations/planet.svg?inline'
 import { useStarknetReact } from '@web3-starknet-react/core'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useQuery } from '@apollo/client'
+import { useTransactions } from 'context/TransactionsProvider'
 import { USER } from '../../../api/gql/querries'
 import { isSameAddress } from '../../../utils'
+import { useLotteryTokenContract } from 'contracts'
+import ToggleAutoBurn from 'components/ui/inputs/ToggleAutoBurn'
 
 const ProfilePage = () => {
   const router = useRouter()
   const { uid } = router.query
   const { account } = useStarknetReact()
+  const { addTransaction } = useTransactions()
+  const [autoBurn, setautoBurn] = useState(0)
+  const [loading, setLoading] = useState(true)
   const { data } = useQuery(USER, {
     variables: {
       address: uid ?? account?.address,
     },
   })
+
+  const { setApprovalForAll, isApprovedForAll } = useLotteryTokenContract()
+
   const user = data?.getAccount
   const isSelf = isSameAddress(account?.address, user?.address)
+
+  const moderator = "Write moderator's address"
+
+  const autoBurnTickets = async () => {
+    if (!autoBurn) {
+      try {
+        const tx = await setApprovalForAll(moderator, 1)
+        addTransaction(
+          tx,
+          'Turn ON AutoBurn',
+          () => fetchApprovalToModerator(),
+          () => {}
+        )
+      } catch (e) {
+        console.error(e)
+      }
+    } else {
+      try {
+        const tx = await setApprovalForAll(moderator, 0)
+        addTransaction(
+          tx,
+          'Turn OFF AutoBurn',
+          () => fetchApprovalToModerator(),
+          () => {}
+        )
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }
+
+  const fetchApprovalToModerator = async () => {
+    try {
+      setLoading(true)
+      const approval_state = await isApprovedForAll(account?.address, moderator)
+      const value_approval = approval_state.is_approved.words[0]
+      setautoBurn(value_approval)
+      console.log(value_approval)
+      setLoading(false)
+    } catch (e) {
+      console.error(e)
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (account?.address) {
+      fetchApprovalToModerator()
+    }
+  }, [account, autoBurn])
 
   return (
     <>
@@ -41,7 +101,22 @@ const ProfilePage = () => {
           </div>
 
           <div className={'mt-4 lg:mt-0 lg:w-1/3 flex-shrink-0'}>
+
             {isSelf && <VerifyAccount />}
+            <div className="VerifyAccount block mb-6">
+            <div className="block--contrast">
+                <div className="title--medium">Add AutoBurn </div>
+                <p className={'text-primaryClear font-bold'}>
+                  In order to automaticly burn your Lottery tickets
+                </p>
+                </div>
+              <div className="block__item">
+              <div className="flex justify-center flex-row gap-4">
+              <div className="title--medium ">Auto-burn</div>
+              <ToggleAutoBurn value={autoBurn} onClick={() => autoBurnTickets()}></ToggleAutoBurn>
+              </div>
+            </div>
+            </div>
 
             <AccountLinks user={user} />
           </div>

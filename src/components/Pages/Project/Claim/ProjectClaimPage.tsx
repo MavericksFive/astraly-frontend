@@ -14,7 +14,6 @@ import { useTransactions } from 'context/TransactionsProvider'
 import { useQuery } from '@apollo/client'
 import { PROJECT } from '../../../../api/gql/querries'
 import Spinner from '../../../ui/Spinner/Spinner'
-import ToggleAutoBurn from 'components/ui/inputs/ToggleAutoBurn'
 import ToastActions from 'actions/toast.actions'
 import { ToastState } from 'components/ui/Toast/utils'
 import { useAppDispatch } from 'hooks/hooks'
@@ -30,10 +29,9 @@ const ProjectClaimPage = () => {
   const [claiming, setClaiming] = useState(false)
   const [loading, setLoading] = useState(true)
   const [hasClaimed, setHasClaimed] = useState(false)
-  const [autoBurn, setautoBurn] = useState(0)
 
   const { getXZKPBalance } = useTokenContract()
-  const { claimLotteryTickets, getTicketsBalance, setApprovalForAll, isApprovedForAll } = useLotteryTokenContract()
+  const { claimLotteryTickets, getTicketsBalance } = useLotteryTokenContract()
   const dispatch = useAppDispatch()
   const { addTransaction } = useTransactions()
 
@@ -47,7 +45,7 @@ const ProjectClaimPage = () => {
     data && setProject(data.project)
   }, [data])
 
- 
+
 
   const handleClaimTickets = async () => {
     if (!project) return
@@ -66,57 +64,6 @@ const ProjectClaimPage = () => {
       setClaiming(false)
     }
   }
-
-  const moderator = "Write the moderator's address"
-
-  const autoBurnTickets = async () => {
-    if (!autoBurn) {
-      try {
-        const tx = await setApprovalForAll(moderator, 1)
-        addTransaction(
-          tx,
-          'Turn ON AutoBurn',
-          () => fetchApprovalToModerator(),
-          () => {}
-        )
-      } catch (e) {
-        console.error(e)
-      }
-    } else {
-      try {
-        const tx = await setApprovalForAll(moderator, 0)
-        addTransaction(
-          tx,
-          'Turn OFF AutoBurn',
-          () => fetchApprovalToModerator(),
-          () => {}
-        )
-      } catch (e) {
-        console.error(e)
-      }
-    }
-  }
-
-  const fetchApprovalToModerator = async () => {
-    if (!project) return
-    try {
-      setLoading(true)
-      const approval_state = await isApprovedForAll(account?.address, moderator)
-      const value_approval = approval_state.is_approved.words[0]
-      setautoBurn(value_approval)
-      console.log(value_approval)
-      setLoading(false)
-    } catch (e) {
-      console.error(e)
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (account?.address && project) {
-      fetchApprovalToModerator()
-    }
-  }, [account, project, autoBurn])
 
   const fetchBalances = async () => {
     if (!project) return
@@ -192,10 +139,6 @@ const ProjectClaimPage = () => {
                   Lock more $ASTR
                 </BaseButton>
               </Link>
-            </div>
-            <div className="flex justify-center flex-row gap-4 mt-5">
-            <div className="title--medium ">Auto-burn</div>
-              <ToggleAutoBurn value={autoBurn} onClick={() => autoBurnTickets()}></ToggleAutoBurn>
             </div>
           </div>
         </div>
