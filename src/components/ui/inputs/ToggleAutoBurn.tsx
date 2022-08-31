@@ -13,7 +13,7 @@ const ToggleAutoBurn: React.FC<{
       role="button"
       tabIndex={0}
       onKeyDown={() => {}}>
-      <div className={style.baseToggleItem}/>
+      <div className={style.baseToggleItem} />
     </div>
   )
 }
